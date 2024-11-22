@@ -8,9 +8,10 @@ from googleapiclient.errors import HttpError
 import pandas as pd
 from google.auth.transport.requests import Request
 
-
-#defining the scope of the application
+# Change this line to be more specific with scopes
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+
+
 
 #Authentication & Service creation
 def authenticate_gmail():
@@ -28,14 +29,12 @@ def authenticate_gmail():
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
                 client_secrets_file, SCOPES)
-            # Specify the exact redirect URI that matches your Google Cloud Console
-            creds = flow.run_local_server(
-                port=8080,
-                redirect_uri_port=8080,
-                authorization_prompt_message='Please visit this URL: '
-            )
+            # Remove the explicit redirect URI configuration
+            creds = flow.run_local_server(port=0)  # Let it use any available port
             with open(token_file, 'w') as token:
                 token.write(creds.to_json())
+    
+    return build('gmail', 'v1', credentials=creds)  #
 
 def get_emails(service, label_ids=['INBOX'], query=''):
     try:
@@ -100,3 +99,6 @@ def main():
         df.to_csv('Emails.csv')
 if __name__ == '__main__':
     main()
+
+
+    
